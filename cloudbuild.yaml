@@ -1,0 +1,25 @@
+steps:
+- name: node:10.15.1
+  entrypoint: npm
+  args: ["install"]
+- name: node:10.15.1
+  entrypoint: bash
+  args: ["apk-get", "update"]
+- name: node:10.15.1
+  entrypoint: bash
+  args: ["apk-get", "install", "-y", "graphicsmagick"]
+- name: node:10.15.1
+  entrypoint: bash
+  args: ["apk-get", "install", "-y", "ghostscript"]
+- name: node:10.15.1
+  entrypoint: npm
+  args: ["run", "create-env"]
+  env:
+    - 'DB_HOST=${_DB_HOST}'
+    - 'DB_NAME=${_DB_NAME}'
+    - 'DB_PASSWORD=${_DB_PASSWORD}'
+    - 'DB_SCHEMA=${_DB_SCHEMA}'
+    - 'DB_USER=${_DB_USER}'
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy"]
+timeout: "1600s"
