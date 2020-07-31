@@ -1,4 +1,4 @@
-FROM node:10.15.2
+FROM gcr.io/google-appengine/nodejs
 WORKDIR '/app'
 COPY ./package.json ./
 RUN npm install
@@ -8,4 +8,5 @@ CMD ["gm", "-version"]
 RUN apt-get install -y ghostscript
 CMD ["gs", "-h"]
 COPY . .
+CMD ["npm", "build"]
 CMD ["npm", "start"]
