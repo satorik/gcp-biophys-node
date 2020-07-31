@@ -1,13 +1,10 @@
 steps:
 - name: node:10.15.1
-  entrypoint: apt-get
-  args: ["update"]
+  args: ["apt-get", "update"]
 - name: node:10.15.1
-  entrypoint: apt-get
-  args: ["install", "-y", "graphicsmagick"]
+  args: ["apt-get", "install", "-y", "graphicsmagick"]
 - name: node:10.15.1
-  entrypoint: apt-get
-  args: ["install", "-y", "ghostscript"]
+  args: ["apt-get", "install", "-y", "ghostscript"]
 - name: node:10.15.1
   entrypoint: npm
   args: ["install"]
