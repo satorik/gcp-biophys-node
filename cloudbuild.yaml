@@ -1,16 +1,16 @@
 steps:
 - name: node:10.15.1
+  entrypoint: apt-get
+  args: ["update"]
+- name: node:10.15.1
+  entrypoint: apt-get
+  args: ["install", "-y", "graphicsmagick"]
+- name: node:10.15.1
+  entrypoint: apt-get
+  args: ["install", "-y", "ghostscript"]
+- name: node:10.15.1
   entrypoint: npm
   args: ["install"]
-- name: node:10.15.1
-  entrypoint: bash
-  args: ["apk", "update"]
-- name: node:10.15.1
-  entrypoint: bash
-  args: ["apk", "install", "-y", "graphicsmagick"]
-- name: node:10.15.1
-  entrypoint: bash
-  args: ["apk", "install", "-y", "ghostscript"]
 - name: node:10.15.1
   entrypoint: npm
   args: ["run", "create-env"]
