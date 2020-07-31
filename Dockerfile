@@ -8,5 +8,5 @@ CMD ["gm", "-version"]
 RUN apt-get install -y ghostscript
 CMD ["gs", "-h"]
 COPY . .
-CMD ["npm", "build"]
+CMD ["npm", "run", "build"]
 CMD ["npm", "start"]

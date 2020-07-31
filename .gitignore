@@ -3,3 +3,4 @@ config
 frontend/mizuxe
 frontend/glozzom
 frontend/LoopLAB
+.env
