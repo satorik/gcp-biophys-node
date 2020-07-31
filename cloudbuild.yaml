@@ -4,13 +4,13 @@ steps:
   args: ["install"]
 - name: node:10.15.1
   entrypoint: bash
-  args: ["apk-get", "update"]
+  args: ["apk", "update"]
 - name: node:10.15.1
   entrypoint: bash
-  args: ["apk-get", "install", "-y", "graphicsmagick"]
+  args: ["apk", "install", "-y", "graphicsmagick"]
 - name: node:10.15.1
   entrypoint: bash
-  args: ["apk-get", "install", "-y", "ghostscript"]
+  args: ["apk", "install", "-y", "ghostscript"]
 - name: node:10.15.1
   entrypoint: npm
   args: ["run", "create-env"]
