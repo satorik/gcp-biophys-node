@@ -4,6 +4,8 @@ import { models } from './models'
 import isAuth from './middleware/isAuth'
 import fs from 'fs'
 
+console.log('we are here with apollo')
+
 const server = new ApolloServer({ 
   schema,
   context: (req) => {
@@ -21,7 +23,9 @@ const server = new ApolloServer({
     stream.write(JSON.stringify(err, null, '\t'))
     stream.on('error', error => {console.log('couldnot save to file', error)})
     return err
-  }
+  },
+  introspection: true,
+   playground: true,
 })
 
 export {server as default}

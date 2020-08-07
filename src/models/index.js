@@ -1,18 +1,35 @@
 import  Sequelize from 'sequelize'
-import path from 'path'
-import dotenv from 'dotenv'
+import config from '../config/config'
 
-dotenv.config({ path: path.resolve(__dirname, '../../.env') })
+console.log(config.DB_HOST, config.DB_NAME, config.DB_USER, config.DB_PASSWORD)
 
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-  host: process.env.DB_HOST,
+const sequelize = new Sequelize(config.DB_NAME, config.DB_USER, config.DB_PASSWORD, {
+  host: config.DB_HOST,
   dialect: 'postgres',
   dialectOptions: {
     useUTC: false,
+    socketPath: config.DB_HOST
   },
-  schema:process.env.DB_SCHEMA,
-  logging: false //console.log
+  schema:config.DB_SCHEMA,
+  logging: false,
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
+  }
+  //console.log,
+
 })
+
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log('Connection has been established successfully.');
+  })
+  .catch(err => {
+    console.error('Unable to connect to the database:', err);
+  })
 
   const models = {
     NavigationLink: sequelize.import('./shared/navigationLink'),
@@ -54,7 +71,6 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
     }
     
   })
-
 
  export { models, sequelize as default }
 

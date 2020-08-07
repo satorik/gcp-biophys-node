@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken'
 import getUser from '../../utils/getUser'
+import config from '../../config/config'
 
 const userQuery = {
   async activateUser(parent, {hashedString}, { models }) {
     try {
-      const decodedString = jwt.verify(hashedString, process.env.JWT_key)
+      const decodedString = jwt.verify(hashedString, config.JWT_key)
       const user = await models.User.findOne({where: {email: decodedString.email}})
        if (user.status !== 'MESSAGESENT')  return {
         message: 'Учетная уже запись была активирована',
@@ -13,7 +14,7 @@ const userQuery = {
       user.status = 'VALIDATED'
       await user.save()
 
-      const token = jwt.sign({userId: user.id, email: user.email}, process.env.JWT_key, {expiresIn: '1d'})
+      const token = jwt.sign({userId: user.id, email: user.email}, config.JWT_key, {expiresIn: '1d'})
   
       return {
         userId: user.id,

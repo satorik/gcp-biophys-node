@@ -2,6 +2,7 @@ import writeImage from './readStreamIntoFile'
 import getUser from './getUser'
 import { convertPdfToBase64 } from './imageFunctions'
 import { ApolloError } from 'apollo-server'
+import fs from 'fs'
 
 const getCreateDataImage = (postData, imageUrl, user) => {
   return {
@@ -26,15 +27,16 @@ const getCreateDataPDF = (postData, fileLink, user, image) => {
   }
 }
 
-const getUploadedLinks = async(image, file, fileType, currentSection) => {
+const getUploadedLinks = async(image, file, fileType, currentSection, fileUploadName) => {
   if (!image && !file) return null
   
   const uploadedFile = fileType === 'image' ? await image : await file
-  const { file: filePath, imageUrl, fileLink } = await writeImage(uploadedFile, currentSection, fileType)
+  const { file: filePath, imageUrl, fileLink } = await writeImage(uploadedFile, currentSection, fileUploadName, fileType, true)
 
   if (image) return {imageUrl}
   if (file) {
     const image = await convertPdfToBase64(filePath)
+    fs.unlinkSync(filePath)
     return {
       fileLink,
       image
@@ -46,7 +48,8 @@ const valueForCreateImg = async(inputData, currentSection, auth, userModel, file
 
   const user = await getUser(auth, userModel)
   const {image, file, ...postData} = inputData
-  const uploaded = await getUploadedLinks(image, file, fileType, currentSection)
+  const fileUploadName = postData.title
+  const uploaded = await getUploadedLinks(image, file, fileType, currentSection, fileUploadName)
   
   if (fileType === 'image') return getCreateDataImage(postData, uploaded.imageUrl, user)
 
@@ -78,6 +81,12 @@ const valueForUpdateImg = async(id, inputData, currentSection, auth, currentMode
                 : await findPostById(id, currentModel)
 
   const {image, file, ...postData} = inputData
+  let fileUploadName
+  if (inputData.title) {
+    fileUploadName = inputData.title
+  } else {
+    fileUploadName = post.title
+  }
 
   const uploaded = await getUploadedLinks(image, file, fileType, currentSection)
  

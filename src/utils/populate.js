@@ -1,13 +1,8 @@
 import db from '../models'
-import createLinks from './createLinks'
-import createNews from './createNews'
-import createDepartment from './createDepartment'
-import createEducation from './createEducation'
-import createScience from './createScience'
 import createBasis from './createBasicDBLayout'
 
 const populate = async (force = true) => {
-
+  console.log('trying populate')
   if (force) {
     await db.sync({force: true})
 

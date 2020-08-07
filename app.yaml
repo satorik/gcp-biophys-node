@@ -1,5 +1,6 @@
 runtime: custom
 env: flex
-automatic_scaling:
-  min_num_instances: 1
-  max_num_instances: 7
+manual_scaling: 
+  instances: 1
+beta_settings:
+  cloud_sql_instances: biophys-node-dck:europe-west3:biophys-postgres

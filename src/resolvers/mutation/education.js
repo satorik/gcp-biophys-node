@@ -2,6 +2,7 @@ import { ApolloError } from "apollo-server"
 import writeImage from '../../utils/readStreamIntoFile'
 import clearImage, { convertPdfToBase64 } from '../../utils/imageFunctions'
 import getUser from '../../utils/getUser'
+import fs from 'fs'
 
 const getEducationSubsection = async (subSectionId, subSectionText, educationFormId, models, filetype) => {
   if (subSectionId || subSectionText) {
@@ -212,22 +213,26 @@ const educationMutation = {
     if (!course) { throw new ApolloError('Course not found') }
 
     const subSection = await getEducationSubsection(inputData.subSectionId, inputData.subSectionText, inputData.educationFormId, models, filetype)
+    let subSectionTitle = await models.EducationForm.findOne({where: {id: subSection}, raw:true})
+    if (subSectionTitle.educationFormId !== null) {
+      subSectionTitle = await models.EducationForm.findOne({where: {id: subSectionTitle.educationFormId}, raw:true})
+    }
     let resourse = {}
 
     if (filetype === 'PDF') {
       const {file, ...postData} = inputData
 
       const uploadedFile = await inputData.file
-      const { file: filePath, fileLink } = await writeImage(uploadedFile, 'education', 'pdf')
-      const image = await convertPdfToBase64(filePath)
-    
+      const fileUploadName = `${course.title}_${subSectionTitle.title}_${inputData.title}`
+      const { file: filePath, fileLink } = await writeImage(uploadedFile, 'education', fileUploadName, 'pdf')
+
       const postWithFile = {
         ...postData,
         fileLink,
         educationFormId: subSection || postData.educationFormId,
-        image: 'data:image/jpeg;base64,'+image.base64,
         educationCourseId: courseId,
-        userCreated: user
+        userCreated: user,
+        type: filetype
       }
       resourse = await models.EducationResourse.create({...postWithFile})
     }
@@ -237,7 +242,8 @@ const educationMutation = {
         fileLink: inputData.file,
         educationCourseId: courseId,
         educationFormId: subSection || postData.educationFormId,
-        userCreated: user
+        userCreated: user,
+        type: filetype
       }
   
       resourse = await models.EducationResourse.create({...postData})
@@ -254,26 +260,40 @@ const educationMutation = {
     if (!resourse) { throw new ApolloError('Resourse not found') }
 
     const form = await resourse.getEducationForm()
+    let subSection
+    if (!((resourse.educationFormId === inputData.educationFormId && inputData.subSectionText === '' && inputData.subSectionId === '') ||
+    (resourse.educationFormId === inputData.subSectionId))) {
+      subSection = await getEducationSubsection(inputData.subSectionId, inputData.subSectionText, inputData.educationFormId, models, filetype)
+      resourse.educationFormId = subSection   
+      await resourse.save()
+
+      await clearSubSection(form, models)
+    }
+
+    let subSectionTitle = await models.EducationForm.findOne({where: {id: subSection}, raw:true})
+    if (subSectionTitle.educationFormId !== null) {
+      subSectionTitle = await models.EducationForm.findOne({where: {id: subSectionTitle.educationFormId}, raw:true})
+    }
+   
+    const educationCourse = await models.EducationCourse.findOne({where: {id: resourse.educationCourseId}, raw:true})
+
     if (inputData.title) resourse.title = inputData.title
     if (inputData.description) resourse.description = inputData.description
     resourse.userUpdated = user
+    await resourse.save()
 
     if (filetype === 'PDF') {
       let isUploaded = {}
       if (inputData.file) {
         const uploadedFile = await inputData.file
-        isUploaded = await writeImage(uploadedFile, 'education', 'pdf')
-        const image = await convertPdfToBase64(isUploaded.file)
-        isUploaded = {
-          ...isUploaded,
-          image
-        }
+        const fileUploadName = `${educationCourse.title}_${subSectionTitle.title}_${resourse.title}`
+    
+        isUploaded = await writeImage(uploadedFile, 'education', fileUploadName, 'pdf')
         clearImage(isUploaded.fileLink, 'education', 'pdf')
       }
 
        if (isUploaded.fileLink) { 
          resourse.fileLink = isUploaded.fileLink
-         resourse.image = isUploaded.image
        }
     }
     else if (filetype === 'URL'){
@@ -282,15 +302,6 @@ const educationMutation = {
 
     await resourse.save()
 
-    if ((resourse.educationFormId === inputData.educationFormId && inputData.subSectionText === '' && inputData.subSectionId === '') ||
-    (resourse.educationFormId === inputData.subSectionId)) await resourse.save()
-    else {
-      const subSection = await getEducationSubsection(inputData.subSectionId, inputData.subSectionText, inputData.educationFormId, models, filetype)
-      resourse.educationFormId = subSection   
-      await resourse.save()
-
-      await clearSubSection(form, models)
-    }
     const forms = await models.EducationForm.findAll({raw:true, where: {educationFormId: null}})
     return { resourse : resourse.dataValues, forms }
 
@@ -305,6 +316,9 @@ const educationMutation = {
     const form = await resourse.getEducationForm()
     const resourseReturn = resourse.dataValues
     await resourse.destroy()
+    if (resourseReturn.type === 'PDF') {
+      clearImage(resourseReturn.fileLink, 'education', 'pdf')
+    }
 
     await clearSubSection(form, models)
 

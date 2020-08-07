@@ -1,8 +1,9 @@
-import { ApolloError, AuthenticationError, UserInputError } from "apollo-server"
+import { AuthenticationError, UserInputError } from "apollo-server"
 import bcrypt from 'bcryptjs'
 import getUser from '../../utils/getUser'
 import jwt from 'jsonwebtoken'
 import sendMail from '../../utils/sendMail'
+import config from '../../config/config'
 
 const userMutation = {
 
@@ -12,7 +13,7 @@ const userMutation = {
     if (existingUser) {throw new UserInputError('Такой пользователь уже существует.')}
 
     const hashedPassword = await bcrypt.hash(inputData.password, 12)
-    const hashedString = jwt.sign({email: inputData.email}, process.env.JWT_key, {expiresIn: '7d'})
+    const hashedString = jwt.sign({email: inputData.email}, config.JWT_key, {expiresIn: '7d'})
 
     const user = await models.User.create({
       email: inputData.email,
@@ -44,7 +45,7 @@ const userMutation = {
     }
 
     if (user.status === 'APPROVED') {
-      const token = jwt.sign({userId: user.id, email: user.email}, process.env.JWT_key, {expiresIn: '1d'})
+      const token = jwt.sign({userId: user.id, email: user.email}, config.JWT_key, {expiresIn: '1d'})
 
       return {
         userId: user.id,
@@ -111,7 +112,7 @@ const userMutation = {
     const user = await models.User.findOne({where: {email}})
     if (!user) return 'Пользователя с таким почтовым адресом не существует'
 
-    const hashedString = jwt.sign({email}, process.env.JWT_key, {expiresIn: '1d'})
+    const hashedString = jwt.sign({email}, config.JWT_key, {expiresIn: '1d'})
     try {
       await sendMail(user.username, user.email, hashedString, 'recovery')
       return 'Письмо отправлено, проверьте почту'
@@ -122,7 +123,7 @@ const userMutation = {
   },
   async changePassword(parent, {hashedString, newPassword}, {models}){
     try {
-      const decodedString = jwt.verify(hashedString, process.env.JWT_key)
+      const decodedString = jwt.verify(hashedString, config.JWT_key)
 
       const user = await models.User.findOne({where: {email: decodedString.email}})
       if (!user) return 'Пользователя с таким почтовым адресом не существует'

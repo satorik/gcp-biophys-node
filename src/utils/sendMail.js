@@ -1,12 +1,13 @@
 import nodemailer from 'nodemailer'
+import config from '../config/config'
 
 export default async (username, email, hashedString, mailType) => {
 
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.GMAIL_ACC,
-      pass: process.env.GMAIL_PASS
+      user: config.GMAIL_ACC,
+      pass: config.GMAIL_PASS
     }
   })
 
@@ -19,7 +20,7 @@ export default async (username, email, hashedString, mailType) => {
     <br>
     <br>
     Для подтверждения регистрации, перейдите по ссылке:<br>
-    ${process.env.WEB_ADR}/account/activation/${hashedString}
+    ${config.WEB_ADR}/account/activation/${hashedString}
     <br>
     <br>
     После подтверждения, ждите, пока вашу учетную запись одобрит один из модераторов.
@@ -35,7 +36,7 @@ export default async (username, email, hashedString, mailType) => {
     <br>
     <br>
     Для восстановления пароля, пройдите по ссылке:<br>
-    ${process.env.WEB_ADR}/account/recovery/${hashedString}
+    ${config.WEB_ADR}/account/recovery/${hashedString}
     <br>
     <br>
     Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.
@@ -49,7 +50,7 @@ export default async (username, email, hashedString, mailType) => {
 
   try {
      await transporter.sendMail({
-      from: process.env.GMAIL_ACC,
+      from: config.GMAIL_ACC,
       to: email,
       subject,
       html: mailHtml 

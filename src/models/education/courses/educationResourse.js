@@ -9,8 +9,8 @@ const educationResourse = (sequelize, DataTypes ) => {
           msg:"title required"
       },
       len:{
-          args:[5, 300],
-          msg:"Minimum 5 characters, Maximum 300 characters"
+          args:[2, 300],
+          msg:"Minimum 2 characters, Maximum 300 characters"
       }
     }
   },

@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken'
+import config from '../config/config'
 
 export default ({ req }) => {
 
@@ -13,7 +14,7 @@ export default ({ req }) => {
   }
   
   try {
-    const decodedToken = jwt.verify(token, process.env.JWT_key)
+    const decodedToken = jwt.verify(token, config.JWT_key)
 
     return {
         isAuth: true,
