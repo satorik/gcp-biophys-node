@@ -52,7 +52,7 @@ export default (
 
     if (type === 'image') {
       readStream
-        .on('error', error => {
+        .on('error', (error) => {
           return reject(error)
         })
         .pipe(blob.createWriteStream({ resumable: false }))
@@ -66,15 +66,15 @@ export default (
         })
     }
     if (type === 'pdf') {
-      if (withImage) {
-        if (!fs.existsSync(path.join(__dirname, '..', 'tmp'))) {
-          fs.mkdirSync(path.join(__dirname, '..', 'tmp'))
-        }
-        readStream.pipe(fs.createWriteStream(savedTmpFile))
-      }
+      // if (withImage) {
+      //   if (!fs.existsSync(path.join(__dirname, '..', 'tmp'))) {
+      //     fs.mkdirSync(path.join(__dirname, '..', 'tmp'))
+      //   }
+      //   readStream.pipe(fs.createWriteStream(savedTmpFile))
+      // }
 
       readStream
-        .on('error', error => {
+        .on('error', (error) => {
           return reject(error)
         })
         .pipe(blob.createWriteStream({ resumable: false }))

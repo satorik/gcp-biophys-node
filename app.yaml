@@ -1,6 +1,1 @@
-runtime: custom
-env: flex
-manual_scaling: 
-  instances: 1
-beta_settings:
-  cloud_sql_instances: biophys-node-dck:europe-west3:biophys-postgres
+runtime: nodejs10
