@@ -19,7 +19,7 @@
     "@babel/core": "^7.10.4",
     "@babel/preset-env": "^7.10.4",
     "@google-cloud/storage": "^5.1.2",
-    "apollo-server": "^2.15.1",
+    "apollo-server": "^2.25.3",
     "apollo-server-express": "^2.15.1",
     "bcryptjs": "^2.4.3",
     "dateformat": "^3.0.3",
